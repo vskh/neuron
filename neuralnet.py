@@ -3,7 +3,7 @@ __author__ = 'Vadym S. Khondar'
 from neuron import InputTerminal, Neuron
 
 
-class ConnectedNeuronet:
+class ConnectedNeuralnet:
 
     def __init__(self, num_inputs, num_outputs, layers_config=None):
         if num_inputs <= 0 or num_outputs <= 0:
