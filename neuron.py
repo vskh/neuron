@@ -1,39 +1,44 @@
 __author__ = 'Vadym S. Khondar'
 
+from collections import OrderedDict
+
 
 class InputTerminal(object):
     def __init__(self):
-        self.value = 0
-        self.synapses = []
+        self.__value = 0
+        self.__synapses = []
 
     def set_value(self, value):
-        self.value = value
+        self.__value = value
 
     def get_value(self):
-        return self.value
+        return self.__value
 
     def connect_synapse(self, neuron):
-        self.synapses.append(neuron)
+        self.__synapses.append(neuron)
 
     def disconnect_synapse(self, neuron):
-        self.synapses.remove(neuron)
+        self.__synapses.remove(neuron)
 
-    def _value(self, value=None):
+    def get_num_synapses(self):
+        return len(self.__synapses)
+
+    def __value(self, value=None):
         if value is None:
-            return self.value
-        elif self.value != value:
-            self.value = value
-            self._propagate()
+            return self.__value
+        elif self.__value != value:
+            self.__value = value
+            self.__propagate()
 
-    def _propagate(self):
-        [n.notify() for n in self.synapses]
+    def __propagate(self):
+        [n.notify() for n in self.__synapses]
 
 
 # Multi input extension of InputTerminal
-class Neuron (InputTerminal):
+class Neuron(InputTerminal):
     def __init__(self):
         super(Neuron, self).__init__()
-        self.dendrites = []
+        self.__dendrites = OrderedDict()
 
     def excite(self):
         self.set_value(1)
@@ -45,7 +50,7 @@ class Neuron (InputTerminal):
         return self.get_value() == 1
 
     def notify(self):
-        inputs = [(neuron.is_excited(), weight) for neuron, weight in self.dendrites]
+        inputs = [(neuron.is_excited(), weight) for neuron, weight in self.__dendrites.items()]
         weighted_sum = 0
         for (v, w) in inputs:
             weighted_sum += v * w
@@ -56,16 +61,28 @@ class Neuron (InputTerminal):
             self.inhibit()
 
     def connect_dendrite(self, neuron, weight=0.5):
-        self.dendrites.append((neuron, weight))
+        self.__dendrites[neuron] = weight
+
+    def get_dendrite_weight_by_idx(self, idx):
+        return self.__dendrites[list(self.__dendrites.keys())[idx]]
+
+    def get_dendrite_weight(self, neuron):
+        return self.__dendrites[neuron]
+
+    def set_dendrite_weight_by_idx(self, idx, weight):
+        self.__dendrites[list(self.__dendrites.keys())[idx]] = weight
 
     def set_dendrite_weight(self, neuron, weight):
-        for p in self.dendrites:
-            if p[0] == neuron:
-                p[1] = weight
-                break
+        if neuron in self.__dendrites:
+            self.__dendrites[neuron] = weight
+        else:
+            raise LookupError("Neuron {} not found".format(neuron))
 
     def disconnect_dendrite(self, neuron):
-        self.dendrites = [(n, w) for n, w in self.dendrites if n != neuron]
+        self.__dendrites = [(n, w) for n, w in self.__dendrites if n != neuron]
+
+    def get_num_dendrites(self):
+        return len(self.__dendrites)
 
     def connect(self, input_terminal, weight=0.5):
         input_terminal.connect_synapse(self)

@@ -12,28 +12,32 @@ class ConnectedNeuralnet:
         self.inputs = []
         self.neurons = []
 
-        layers_config = layers_config or [1, 1]
+        layers_config = layers_config or [[(1,)], [(1,)], [(1,)]]
 
         # create inputs
         [self.inputs.append(InputTerminal()) for i in range(0, num_inputs)]
 
         # create and connect neurons
         prev_layer = self.inputs
-        for layer_size in layers_config:
+        for layer_config in layers_config[0:-1]:
+            layer_size = len(layer_config)
             curr_layer = []
             for i in range(0, layer_size):
                 neuron = Neuron()
                 curr_layer.append(neuron)
-                [neuron.connect(prev_layer[i]) for i in range(0, len(prev_layer))]
+                for j in range(0, len(prev_layer)):
+                    neuron.connect(prev_layer[j], layer_config[i][j])
+
             self.neurons.append(curr_layer)
             prev_layer = curr_layer
 
         # create and connect output layer
         outer_layer = []
+        layer_config = layers_config[-1]
         for i in range(0, num_outputs):
             neuron = Neuron()
             outer_layer.append(neuron)
-            [neuron.connect(prev_layer[i]) for i in range(0, len(prev_layer))]
+            [neuron.connect(prev_layer[j], layer_config[i][j]) for j in range(0, len(prev_layer))]
         self.neurons.append(outer_layer)
 
     def get_num_inputs(self):
@@ -43,11 +47,8 @@ class ConnectedNeuralnet:
         return len(self.neurons[len(self.neurons) - 1])
 
     def set_inputs(self, input_values):
-        for i in range(0, len(self.inputs)):
-            if input_values[i]:
-                self.inputs[i].excite()
-            else:
-                self.inputs[i].inhibit()
+        for i, value in enumerate(input_values):
+            self.inputs[i].set_value(value)
 
     def get_num_layers(self):
         return len(self.neurons)
@@ -57,5 +58,18 @@ class ConnectedNeuralnet:
         [outputs.append(neuron.get_value()) for neuron in self.neurons[len(self.neurons) - 1]]
         return outputs
 
-    def _get_layer(self, layer_num):
+    def configure(self, layers_config):
+        for layer_num, layer_config in enumerate(layers_config):
+            layer = self.__get_layer(layer_num)
+            if len(layer_config) != len(layer):
+                raise ValueError("Incorrect layer size for layer {}".format(layer_num))
+
+            for neuron_num, neuron in enumerate(layer):
+                if len(layer_config[neuron_num]) != neuron.get_num_dendrites():
+                    raise ValueError("Incorrect number of inputs for neuron {0} in layer {1}".
+                                     format(neuron_num, layer_num))
+                for dendrite_num, dendrite_weight in enumerate(layer_config[neuron_num]):
+                    neuron.set_dendrite_weight_by_idx(dendrite_num, dendrite_weight)
+
+    def __get_layer(self, layer_num):
         return self.neurons[layer_num]

@@ -36,6 +36,15 @@ class Test(unittest.TestCase):
 
         self.assertTrue(n.is_excited(), "Neuron should be excited")
 
+    def test_neuron_dendrite_weight(self):
+        n = Neuron()
+        with self.assertRaises(
+                LookupError):  # , "Neuron should raise error for not existing dendrite"):
+            n.set_dendrite_weight_by_idx(0, 0)
+        n2 = Neuron()
+        n.connect_dendrite(n2)
+        n.set_dendrite_weight_by_idx(0, 0.5)
+
 
 if __name__ == "__main__":
     unittest.main()
