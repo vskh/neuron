@@ -9,7 +9,7 @@ from neuralnet import ConnectedNeuralnet
 class Test(unittest.TestCase):
     def setUp(self):
         net = ConnectedNeuralnet(1, 1)
-        self.teacher = GeneticTeacher(net, 10, 50)
+        self.teacher = GeneticTeacher(net, [], 10, 50)
 
     def test_gen_subpopulation(self):
         subpop = self.teacher._GeneticTeacher__gen_subpopulation(10)
@@ -22,11 +22,20 @@ class Test(unittest.TestCase):
                                                                               "have 100 items")
         self.teacher._GeneticTeacher__retire()
         self.assertLess(len(self.teacher._GeneticTeacher__current_pop), 100, "After retirement "
-                                                                              "population should "
-                                                                              "be less than 100")
-        self.assertGreater(len(self.teacher._GeneticTeacher__current_pop), 50, "After retirement "
                                                                              "population should "
-                                                                             "be greater than 50")
+                                                                             "be less than 100")
+        self.assertGreater(len(self.teacher._GeneticTeacher__current_pop), 50, "After retirement "
+                                                                               "population should "
+                                                                               "be greater than 50")
+
+    def test_crossover_once(self):
+        self.teacher._GeneticTeacher__current_pop = [(0, [0.1, 0.2, 0.3, 0.4]),
+                                                     (0, [0.5, 0.6, 0.7, 0.8])]
+        self.teacher._GeneticTeacher__crossover_once(1, 0, 1)
+
+        self.assertEqual(self.teacher._GeneticTeacher__current_pop, [(0, [0.1, 0.6, 0.7, 0.8]),
+                                                                     (0, [0.5, 0.2, 0.3, 0.4])])
+
 
 if __name__ == "__main__":
     unittest.main()
