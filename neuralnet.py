@@ -12,7 +12,7 @@ class ConnectedNeuralnet:
         self.__inputs = []
         self.__neurons = []
 
-        layers_config = layers_config or [[(1,)], [(1,)], [(1,)]]
+        layers_config = layers_config or [[tuple(1 for i in range(0, num_inputs))], [(1,)], [(1,)]]
 
         # create inputs
         [self.__inputs.append(InputTerminal()) for i in range(0, num_inputs)]
@@ -54,9 +54,7 @@ class ConnectedNeuralnet:
         return len(self.__neurons)
 
     def get_outputs(self):
-        outputs = []
-        [outputs.append(neuron.get_value()) for neuron in self.__neurons[len(self.__neurons) - 1]]
-        return outputs
+        return [neuron.get_value() for neuron in self.__neurons[len(self.__neurons) - 1]]
 
     def configure(self, layers_config):
         for layer_num, layer_config in enumerate(layers_config):
@@ -72,11 +70,13 @@ class ConnectedNeuralnet:
                     neuron.set_dendrite_weight_by_idx(dendrite_num, dendrite_weight)
 
     def get_configuration(self):
-        configuration = []
+        conf = []
         for layer in self.__neurons:
+            l = []
             for neuron in layer:
-                configuration.append(neuron.get_dendrite_weights())
-        return configuration
+                l.append(neuron.get_dendrite_weights())
+            conf.append(l)
+        return conf
 
     def __get_layer(self, layer_num):
         return self.__neurons[layer_num]

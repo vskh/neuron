@@ -73,5 +73,16 @@ class ConnectedNeuralnetTest(unittest.TestCase):
         self.assertEquals(layer3[1].get_dendrite_weight_by_idx(0), 2.0, "Weight should be 2.0")
         self.assertEquals(layer3[1].get_dendrite_weight_by_idx(1), 3.0, "Weight should be 3.0")
 
+    def test_get_configuration(self):
+        neuralnet = ConnectedNeuralnet(1, 1)
+        self.assertEqual(neuralnet.get_configuration(),
+                         [[(1,)], [(1,)], [(1,)]], "Unexpected default configuration of net")
+
+        neuralnet = ConnectedNeuralnet(4, 1)
+        self.assertEqual(neuralnet.get_configuration(),
+                         [[(1, 1, 1, 1)], [(1,)], [(1,)]],
+                         "Unexpected default configuration of net")
+
+
 if __name__ == "__main__":
     unittest.main()
