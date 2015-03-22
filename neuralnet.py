@@ -72,10 +72,10 @@ class ConnectedNeuralnet:
     def get_configuration(self):
         conf = []
         for layer in self.__neurons:
-            l = []
+            layer_neuron_weights = []
             for neuron in layer:
-                l.append(neuron.get_dendrite_weights())
-            conf.append(l)
+                layer_neuron_weights.append(neuron.get_dendrite_weights())
+            conf.append(layer_neuron_weights)
         return conf
 
     def __get_layer(self, layer_num):
