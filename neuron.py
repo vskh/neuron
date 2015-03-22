@@ -5,14 +5,14 @@ from collections import OrderedDict
 
 class InputTerminal(object):
     def __init__(self):
-        self.__value = 0
+        self.__val = 0
         self.__synapses = []
 
     def set_value(self, value):
-        self.__value = value
+        self.__value(value)
 
     def get_value(self):
-        return self.__value
+        return self.__value()
 
     def connect_synapse(self, neuron):
         self.__synapses.append(neuron)
@@ -25,9 +25,9 @@ class InputTerminal(object):
 
     def __value(self, value=None):
         if value is None:
-            return self.__value
-        elif self.__value != value:
-            self.__value = value
+            return self.__val
+        elif self.__val != value:
+            self.__val = value
             self.__propagate()
 
     def __propagate(self):
@@ -47,18 +47,19 @@ class Neuron(InputTerminal):
         self.set_value(0)
 
     def is_excited(self):
-        return self.get_value() == 1
+        return self.get_value() > 0.5
 
     def notify(self):
-        inputs = [(neuron.is_excited(), weight) for neuron, weight in self.__dendrites.items()]
+        inputs = [(neuron.get_value(), weight) for neuron, weight in self.__dendrites.items()]
         weighted_sum = 0
         for (v, w) in inputs:
             weighted_sum += v * w
+        print("WEIGHTED_SUM: {}".format(weighted_sum))
+        self.set_value(weighted_sum)
 
-        if weighted_sum > 0.5:
-            self.excite()
-        else:
-            self.inhibit()
+    def connect(self, input_terminal, weight=0.5):
+        input_terminal.connect_synapse(self)
+        self.connect_dendrite(input_terminal, weight)
 
     def connect_dendrite(self, neuron, weight=0.5):
         self.__dendrites[neuron] = weight
@@ -86,7 +87,3 @@ class Neuron(InputTerminal):
 
     def get_num_dendrites(self):
         return len(self.__dendrites)
-
-    def connect(self, input_terminal, weight=0.5):
-        input_terminal.connect_synapse(self)
-        self.connect_dendrite(input_terminal, weight)

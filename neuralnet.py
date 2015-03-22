@@ -15,7 +15,7 @@ class ConnectedNeuralnet:
         layers_config = layers_config or [[tuple(1 for i in range(0, num_inputs))], [(1,)], [(1,)]]
 
         # create inputs
-        [self.__inputs.append(InputTerminal()) for i in range(0, num_inputs)]
+        self.__inputs = [InputTerminal() for i in range(0, num_inputs)]
 
         # create and connect neurons
         prev_layer = self.__inputs
@@ -53,8 +53,17 @@ class ConnectedNeuralnet:
     def get_num_layers(self):
         return len(self.__neurons)
 
+    def get_state(self):
+        state = []
+        for layer in self.__neurons:
+            layer_state = []
+            for neuron in layer:
+                layer_state.append(neuron.get_value())
+            state.append(layer_state)
+        return state
+
     def get_outputs(self):
-        return [neuron.get_value() for neuron in self.__neurons[len(self.__neurons) - 1]]
+        return [int(neuron.is_excited()) for neuron in self.__neurons[len(self.__neurons) - 1]]
 
     def configure(self, layers_config):
         for layer_num, layer_config in enumerate(layers_config):

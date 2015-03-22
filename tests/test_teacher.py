@@ -29,13 +29,12 @@ class Test(unittest.TestCase):
                                                                                "be greater than 50")
 
     def test_crossover_once(self):
-        self.teacher._GeneticTeacher__current_pop = [(0, [0.1, 0.2, 0.3, 0.4]),
-                                                     (0, [0.5, 0.6, 0.7, 0.8])]
-        self.teacher._GeneticTeacher__crossover_once(1, 0, 1)
+        children = GeneticTeacher._GeneticTeacher__crossover_once([0.1, 0.2, 0.3, 0.4],
+                                                                  [0.5, 0.6, 0.7, 0.8], 1)
 
-        self.assertEqual(self.teacher._GeneticTeacher__current_pop, [(0, [0.1, 0.6, 0.7, 0.8]),
-                                                                     (0, [0.5, 0.2, 0.3, 0.4])])
-
+        self.assertEqual(children,
+                         ([0.1, 0.6, 0.7, 0.8], [0.5, 0.2, 0.3, 0.4]),
+                         "Invalid crossover")
 
 if __name__ == "__main__":
     unittest.main()
