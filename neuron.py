@@ -67,7 +67,7 @@ class Neuron(InputTerminal):
         return self.__dendrites[list(self.__dendrites.keys())[idx]]
 
     def get_dendrite_weights(self):
-        return list(self.__dendrites.values())
+        return tuple(self.__dendrites.values())
 
     def get_dendrite_weight(self, neuron):
         return self.__dendrites[neuron]
