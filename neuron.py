@@ -54,7 +54,7 @@ class Neuron(InputTerminal):
         weighted_sum = 0
         for (v, w) in inputs:
             weighted_sum += v * w
-        print("WEIGHTED_SUM: {}".format(weighted_sum))
+        # print("WEIGHTED_SUM: {}".format(weighted_sum))
         self.set_value(weighted_sum)
 
     def connect(self, input_terminal, weight=0.5):

@@ -11,7 +11,7 @@ class GeneticTeacher:
         self.__mutation_factor = mutation_factor
         self.__retirement_factor = retirement_factor
         self.__current_pop = []
-        self.__pop_size = 10
+        self.__pop_size = 100
 
     def __gen_subpopulation(self, population_size):
         subpop = []
@@ -26,24 +26,29 @@ class GeneticTeacher:
 
     def __gen_population(self):
         items = self.__gen_subpopulation(self.__pop_size)
-        self.__current_pop = [(self.__fitness(item), item) for item in items]
+        self.__current_pop = self.__calc_fitness(items)
 
     def __sort_population(self):
-        self.__current_pop.sort(key=lambda i: i[0])
+        self.__current_pop.sort(key=lambda i: i[0], reverse=True)
 
-    def __fitness(self, item):
-        net = self.__neuralnet
-        shape = net.get_configuration()
-
+    @staticmethod
+    def __cvt_vector_to_conf(vector, shape):
         conf = []
         pos = 0
         for layer in shape:
             layer_neuron_weights = []
             for neuron in layer:
-                neuron_weights = item[pos:pos+len(neuron)]
+                neuron_weights = vector[pos:pos+len(neuron)]
                 pos += len(neuron)
                 layer_neuron_weights.append(neuron_weights)
             conf.append(layer_neuron_weights)
+        return conf
+
+    def __fitness(self, item):
+        net = self.__neuralnet
+        shape = net.get_configuration()
+
+        conf = self.__cvt_vector_to_conf(item, shape)
 
         net.configure(conf)
 
@@ -59,9 +64,14 @@ class GeneticTeacher:
 
         fitness = 0
         for inputs, outputs in self.__training_set:
+            # print("Fitness: {}".format(fitness))
             fitness += test(inputs, outputs)
 
+        print("Fitness: {}".format(fitness))
         return fitness
+
+    def __calc_fitness(self, items):
+        return [(self.__fitness(item), item) for item in items]
 
     def __retire(self):
         num_retired = int(uniform(0, self.__retirement_factor))
@@ -92,7 +102,7 @@ class GeneticTeacher:
             idx2 = int(uniform(0, sz))
             children = self.__crossover_once(self.__current_pop[idx1][1],
                                              self.__current_pop[idx2][1])
-            self.__current_pop.extend(map(lambda it: (self.__fitness(it), it), children))
+            self.__current_pop.extend(self.__calc_fitness(children))
 
     def __mutate(self):
         sz = len(self.__current_pop)
@@ -106,7 +116,7 @@ class GeneticTeacher:
 
         extension_pop_size = int(max(self.__pop_size - sz, sz * self.__mutation_factor))
         extension_pop = self.__gen_subpopulation(extension_pop_size)
-        self.__current_pop.extend(extension_pop)
+        self.__current_pop.extend(self.__calc_fitness(extension_pop))
 
     def teach(self, num_iterations=100, continue_teaching=True):
         if not self.__current_pop or not continue_teaching:
@@ -119,4 +129,12 @@ class GeneticTeacher:
             self.__mutate()
             print("Best specimen (fitness {}): ".format(self.__current_pop[0][0]))
             print(", ".join(str(w) for w in self.__current_pop[0][1]))
-            print("")
+            if self.__current_pop[0][0] == len(self.__training_set):
+                print("Found solution fits all training samples. Stopping search")
+                break
+
+    def get_best_specimen(self):
+        fitness = self.__current_pop[0][0]
+        conf = self.__cvt_vector_to_conf(self.__current_pop[0][1],
+                                         self.__neuralnet.get_configuration())
+        return (fitness, conf)

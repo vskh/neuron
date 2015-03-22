@@ -63,7 +63,7 @@ class ConnectedNeuralnet:
         return state
 
     def get_outputs(self):
-        return [int(neuron.is_excited()) for neuron in self.__neurons[len(self.__neurons) - 1]]
+        return tuple(int(neuron.is_excited()) for neuron in self.__neurons[len(self.__neurons) - 1])
 
     def configure(self, layers_config):
         for layer_num, layer_config in enumerate(layers_config):
