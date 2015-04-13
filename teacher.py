@@ -20,7 +20,8 @@ class GeneticTeacher:
             for layer in self.__neuralnet_configuration:
                 for neuron in layer:
                     for weight in neuron:
-                        genotype.append(random())
+                        sign = 1 if random() > 0.5 else -1
+                        genotype.append(sign * random())
             subpop.append(genotype)
         return subpop
 
